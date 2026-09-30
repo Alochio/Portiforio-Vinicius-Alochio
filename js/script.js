@@ -1,113 +1,170 @@
-
-// Mobile Menu Toggle
-const menuToggle = document.querySelector('.menu-toggle');
-const navLinks = document.querySelector('.nav-links');
-
-menuToggle.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-    menuToggle.classList.toggle('active');
-});
-
-// Close menu when clicking on a link
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-        menuToggle.classList.remove('active');
-    });
-});
-
-// Smooth Scrolling
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            const headerOffset = 80;
-            const elementPosition = target.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-// Back to Top Button
-const backToTop = document.querySelector('.back-to-top');
-
-window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 300) {
-        backToTop.classList.add('visible');
-    } else {
-        backToTop.classList.remove('visible');
+if (document.documentElement.classList.contains('has-intro')) {
+  const dismissIntroOnKeyboard = (event) => {
+    if (event.key === 'Tab' || event.key === 'Escape') {
+      document.documentElement.classList.remove('has-intro', 'intro-ready');
+      document.removeEventListener('keydown', dismissIntroOnKeyboard);
     }
-});
-
-backToTop.addEventListener('click', () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-});
-
-// Scroll Animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-        }
-    });
-}, observerOptions);
-
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-// Header Scroll Effect
-let lastScroll = 0;
-const header = document.querySelector('header');
-
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-
-    if (currentScroll > lastScroll && currentScroll > 100) {
-        header.style.transform = 'translateY(-100%)';
-    } else {
-        header.style.transform = 'translateY(0)';
-    }
-
-    lastScroll = currentScroll;
-});
-
-// Form Submission
-function handleSubmit(event) {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData);
-
-    // Create mailto link with form data
-    const subject = encodeURIComponent(data.subject);
-    const body = encodeURIComponent(
-        `Nome: ${data.name}\nEmail: ${data.email}\n\nMensagem:\n${data.message}`
-    );
-
-    window.location.href = `mailto:alochioti@outlook.com?subject=${subject}&body=${body}`;
-
-    // Reset form
-    event.target.reset();
-
-    // Show success message
-    alert('Obrigado pelo contato! Seu cliente de email será aberto para enviar a mensagem.');
-
-    return false;
+  };
+  document.addEventListener('keydown', dismissIntroOnKeyboard);
+  window.setTimeout(() => {
+    document.documentElement.classList.remove('has-intro');
+    document.removeEventListener('keydown', dismissIntroOnKeyboard);
+  }, 1950);
 }
 
-// Dynamic Year in Footer
-document.querySelector('footer p').innerHTML =
-    `&copy; ${new Date().getFullYear()} Vinícius Alochio Santos. Todos os direitos reservados.`;
+const services = [
+  { icon: '</>', title: 'Desenvolvimento de sistemas', description: 'Aplicações web, interfaces e sistemas sob medida para organizar operações e criar experiências digitais claras.' },
+  { icon: '↗', title: 'Automação de processos', description: 'Fluxos e ferramentas que reduzem tarefas repetitivas e liberam tempo para decisões de maior valor.' },
+  { icon: '⇄', title: 'Integrações', description: 'Conexão entre sistemas, dados e serviços para que a informação circule com consistência.' }
+];
+
+const principles = [
+  { title: 'Entender antes de construir', description: 'O contexto e os objetivos orientam as escolhas técnicas.' },
+  { title: 'Fazer o complexo parecer simples', description: 'Interfaces claras e fluxos bem pensados aproximam a tecnologia das pessoas.' },
+  { title: 'Criar para evoluir', description: 'Bases organizadas ajudam a solução a crescer com o negócio.' }
+];
+
+const create = (tag, className, text) => {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+};
+
+const servicesGrid = document.querySelector('#services-grid');
+services.forEach(({ icon, title, description }) => {
+  const card = create('article', 'service-card reveal');
+  const top = create('div', 'service-top');
+  top.setAttribute('aria-hidden', 'true');
+  top.append(create('span', '', 'SERVIÇO'), create('span', 'service-icon', icon));
+  const bottom = create('div', 'service-bottom');
+  bottom.setAttribute('aria-hidden', 'true');
+  card.append(top, create('h3', '', title), create('p', '', description), bottom);
+  servicesGrid.append(card);
+});
+
+const principlesList = document.querySelector('#principles-list');
+principles.forEach(({ title, description }) => {
+  const item = create('div', 'principle reveal');
+  const content = create('div');
+  content.append(create('h3', '', title), create('p', '', description));
+  item.append(content);
+  principlesList.append(item);
+});
+
+const menuButton = document.querySelector('.menu-toggle');
+const menu = document.querySelector('.site-nav');
+function closeMenu() {
+  menu.classList.remove('is-open');
+  document.body.classList.remove('menu-open');
+  menuButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-label', 'Abrir menu');
+}
+menuButton.addEventListener('click', () => {
+  const isOpen = menu.classList.toggle('is-open');
+  document.body.classList.toggle('menu-open', isOpen);
+  menuButton.setAttribute('aria-expanded', String(isOpen));
+  menuButton.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+});
+menu.addEventListener('click', (event) => { if (event.target.closest('a')) closeMenu(); });
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && menu.classList.contains('is-open')) {
+    closeMenu();
+    menuButton.focus();
+  }
+});
+document.addEventListener('click', (event) => {
+  if (!menu.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
+});
+window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => { if (event.matches) closeMenu(); });
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const brandLogoButton = document.querySelector('.alochio-logo-button');
+const brandLogoImage = brandLogoButton.querySelector('img');
+function syncBrandLogoMotion() {
+  brandLogoButton.disabled = reducedMotion.matches;
+  if (reducedMotion.matches) brandLogoButton.classList.remove('is-spinning');
+}
+reducedMotion.addEventListener('change', syncBrandLogoMotion);
+syncBrandLogoMotion();
+brandLogoButton.addEventListener('click', () => {
+  brandLogoButton.classList.remove('is-spinning');
+  void brandLogoButton.offsetWidth;
+  brandLogoButton.classList.add('is-spinning');
+});
+brandLogoImage.addEventListener('animationend', () => brandLogoButton.classList.remove('is-spinning'));
+if ('IntersectionObserver' in window && !reducedMotion.matches) {
+  document.documentElement.classList.add('js-motion');
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -28px 0px' });
+  document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      document.querySelectorAll('.site-nav a[href^="#"]').forEach((link) => {
+        if (link.getAttribute('href') === `#${entry.target.id}`) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    });
+  }, { rootMargin: '-35% 0px -55% 0px' });
+  document.querySelectorAll('main section[id]').forEach((section) => sectionObserver.observe(section));
+}
+
+const progress = document.querySelector('.scroll-progress');
+let ticking = false;
+function updateProgress() {
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.transform = `scaleX(${maxScroll > 0 ? window.scrollY / maxScroll : 0})`;
+  ticking = false;
+}
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    window.requestAnimationFrame(updateProgress);
+    ticking = true;
+  }
+}, { passive: true });
+window.addEventListener('resize', updateProgress);
+updateProgress();
+
+const contactForm = document.querySelector('#contact-form');
+const preparedMessage = document.querySelector('#prepared-message');
+const preparedTitle = document.querySelector('#prepared-title');
+const openEmail = document.querySelector('#open-email');
+const messagePreview = document.querySelector('#message-preview');
+const copyStatus = document.querySelector('#copy-status');
+
+contactForm.addEventListener('input', () => {
+  preparedMessage.hidden = true;
+});
+
+contactForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  const subjectText = `Contato Alochio Technologies: ${data.get('topic')}`;
+  const bodyText = `Nome: ${data.get('name')}\nE-mail: ${data.get('email')}\nInteresse: ${data.get('topic')}\n\nMensagem:\n${data.get('message')}`;
+  openEmail.href = `mailto:alochiotechnologies@gmail.com?subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
+  messagePreview.value = `Para: alochiotechnologies@gmail.com\nAssunto: ${subjectText}\n\n${bodyText}`;
+  preparedMessage.hidden = false;
+  copyStatus.textContent = '';
+  preparedTitle.focus();
+});
+
+document.querySelector('#copy-message').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(messagePreview.value);
+    copyStatus.textContent = 'Mensagem copiada.';
+  } catch {
+    messagePreview.focus();
+    messagePreview.select();
+    copyStatus.textContent = 'Selecione e copie a mensagem acima.';
+  }
+});
+
+document.querySelector('#year').textContent = new Date().getFullYear();
